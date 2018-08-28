@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <p>简单的数字验证：</p>
+        <input type="number" pattern="d">
+        <input type="number" pattern="[0-9]*">
+        <p>{{msg}}</p>
+        <p>reverse methods: {{reverseMessageFun()}}</p>
+        <p>reverse computed: {{reverseMessageComputed}}</p>
+        <p>date computed: {{now}}</p>
+        <p>
+            <button v-on:click="reverseMessage">逆转消息</button>
+            <button @click="reverseMessage">逆转消息</button>
+        </p>
+        <span v-bind:title="'m-' + message">    <!--模板表达式  必须是单个表达式-->
+            {{message}}
+        </span>
+        <br/>
+        <span :title="message">v-bind: ==> :</span>
+        <p v-if="seen">show me</p>
+        <p v-show="seen">show me Dom</p>
+        <p>{{rawHtml}}</p>
+        <p><span v-html="rawHtml"></span></p>
+        <ul>
+            <li v-for="(item, index) in items" :key="item.id">index- {{index}} : {{item}}</li>
+        </ul>
+        <ul>
+            <li v-for="item in sortItems">{{item}}</li>
+        </ul>
+        <ul>
+            <li v-for="objItem in objItems">{{objItem.firstName}} {{objItem.lastName}} is {{objItem.age}} year old!</li>
+        </ul>
+        <ul>
+            <li v-for="objItem in objItems">
+                <p v-for="(value, key, index) in objItem">{{index}}. {{key}}: {{value}}</p>
+            </li>
+        </ul>
+        <ul>
+            <li v-for="(value, key) in obj">{{key}}: {{value}}</li>
+        </ul>
+
+        <hr/>
+
+        <ol>
+            <todo-item v-for="item in groceryList" :todo="item" :key="item.id"></todo-item>
+        </ol>
+        <hr/>
+
+        <p>{{fullName}}</p>
+        <p>Ask a yes/ne questions: <input v-model="question"></p>
+        <p>{{answer}}</p>
+
+        <p class="static" :class="{'active': isActive, 'text-danger': hasError}">css bind</p>
+        <p :class="cssObject">css bind cssobj</p>
+        <p :class="[{active: isActive}, errorClass]">css 数组</p>
+
+        <div v-if="Math.random() > 0.3">
+            大于0.3
+        </div>
+        <div v-else-if="Math.random() > 0.5">
+            大于0.5
+        </div>
+        <div v-else>
+            else others
+        </div>
+        <template v-if="loginType === 'username'">
+            <label>Username</label>
+            <input placeholder="enter your username" key="username-input" />
+        </template>
+        <template v-else>
+            <label>Email</label>
+            <input placeholder="enter your email" key="email-input" />
+        </template>
+        <button @click='toggleLoginType'>toggle login type</button>
+        <hr/>
+    </div>
+
+    <div id="todo-list-example">
+        <input v-model="newTodoText" v-on:keyup.enter="addNewTodo" placeholder="add a todo">
+
+        <ul>
+            <li is="todo-item-eg" v-for="(todo, index) in todos" :key="todo.id" :title="todo.title" @remove="todos.splice(index,1)"></li>
+        </ul>
+    </div>
+
+    <hr/>
+    <div id="component-demos">
+        <button-counter></button-counter>
+        <button-counter></button-counter>
+        <button-counter></button-counter>
+
+        <br/>
+        <blog-post title="Blog with Cue"></blog-post>
+        <blog-post title="ssdd dfg fh"></blog-post>
+
+        <div :style="{fontSize: postFontSize + 'em'}">
+            <blog-post v-for="post in posts" :key="post.id" :title="post.title"></blog-post>
+        </div>
+
+        <div :style="{fontSize: postFontSize + 'em'}">
+            <!--v-on:enlarge-text="postFontSize += $event"-->
+            <blog-post-two v-for="post in posts" :key="post.id" :post="post" v-on:enlarge-text="onEnlargeText"></blog-post-two>
+        </div>
+
+        <!--<custom-input :value="searchText" v-on:input="searchText = $event"></custom-input>-->
+        {{searchText}}<custom-input v-model="searchText"></custom-input>
+
+        <alert-box>
+            something bad happened.
+        </alert-box>
+        
+        <table>
+            <tr is='my-row'></tr>
+        </table>
+        <hr/>
+    </div>
+<script>
+    function sortNumber(a,b){
+        return a - b
+    }
+
+    //    组件 写在 new Vue 实例之前
+    Vue.component('todo-item', {
+        props: ['todo'],
+        template: '<li>{{todo.text}}</li>'
+    })
+
+    var app = new Vue({
+        el: "#app",
+        data: {
+            loginType: 'username',
+            isActive: true,
+            hasError: false,
+            errorClass: 'text-danger',
+            cssObject: {
+              active: true,
+                'text-danger': false
+            },
+            firstName: 'Foo',
+            lastName: 'Bar',
+            msg: 'Hello Vue.js!',                                //响应式依赖
+            message: '页面加载于' + new Date().toLocaleString(),
+            seen: true,
+            rawHtml: '<span style="color:red">red</span>',
+            items: [1,34,89,45,78,9],
+            objItems: [
+                {
+                    firstName: 'Jack',
+                    lastName: 'Li',
+                    age: 32
+                },
+                {
+                    firstName: 'Arisn',
+                    lastName: 'Liao',
+                    age: 12
+                }
+            ],
+            obj: {
+                firstName: 'Arisn',
+                lastName: 'Liao',
+                age: 12
+            },
+            groceryList: [
+                {id: 0, text: 'shucai'},
+                {id: 1, text: 'naliao'},
+                {id: 2, text: 'suibian'}
+            ],
+            question: '',
+            answer: 'I cannot give you an answer until you ask a question!'
+        },
+        created: function(){        //生命周期钩子
+          console.log('this is:' + this.msg)   //this 指向调用它的Vue实例 不要使用箭头函数
+        },
+        watch: {                  //侦听属性
+            // 如果 question 发生改变，这个函数就会执行
+            question: function(newQuestion, oldQuestion){
+                this.answer = 'waiting for you to stop typing...'
+                this.getAnswer()
+            }
+        },
+        computed: {                //computed 计算属性 基于它们的依赖进行缓存的
+            //默认 getter
+            sortItems : function(){
+                return this.items.sort(sortNumber)
+            },
+            fullName: {
+                //getter
+                get: function(){
+                    return this.firstName + ' ' + this.lastName
+                },
+                //setter
+                set: function(newVal){
+                    var names = newVal.split(' ')
+                    this.firstName = names[0]
+                    this.lastName = names[names.length - 1]
+                }
+            },
+            reverseMessageComputed: function(){
+                console.log('执行computed')
+                return this.msg.split('').reverse().join('')
+            },
+            now: function(){
+                return Date.now()
+            }
+        },
+        methods: {
+            toggleLoginType: function(){
+                if(this.loginType === 'username'){
+                    this.loginType = 'email'
+                }else{
+                    this.loginType = 'username'
+                }
+                
+            },
+            reverseMessageFun: function(){
+                console.log('执行method')
+                return this.msg.split('').reverse().join('')
+            },
+
+            reverseMessage: function(){
+                this.msg = this.msg.split('').reverse().join('')
+            },
+            // `_.debounce` 是一个通过 Lodash 限制操作频率的函数。
+            getAnswer: _.debounce(
+                    function(){
+                        if(this.question.indexOf('?') === -1){
+                            this.answer = 'Questions usually contain a question mark. ;-)'
+                            return
+                        }
+                        this.answer = 'Thinking...';
+                        var vm  = this;
+                        axios.get('https://yesno.wtf/api').then(function(response){
+                            vm.answer = + _.capitalize(response.data.answer)
+                        }).catch(function(error){
+                            vm.answer = 'Error!' + error
+                        })
+                    },
+                    500
+            )
+        }
+    })
+
+//    app.$data.seen = false;
+//    app.seen = false;    v-if 不生成DOM   v-show ==> display:none
+    Vue.set(app.obj, 'from', 'Beijing');   //Vue.set ==> app.$set
+
+//    v-bind  数据绑定  属性名可以用驼峰式 camelCase 或 短横线分隔 'kebab-case' 用单引号括起来
+
+//    v-for="item in items"  可以用 of 替代 in 作为分隔符
+//    v-for="item of items"
+//    v-for="(value, key, index) in object" :key="item.id"  尽量提供key值
+
+
+
+//    $emit('remove') ???
+
+    Vue.component('todo-item-eg', {
+        template: '<li>{{title}} <button @click="$emit(\'remove\')">X</button></li>',
+        props: ['title']
+    })
+
+    var todoList = new Vue({
+        el: '#todo-list-example',
+        data: {
+            newTodoText: '',
+            todos: [
+                {
+                    id: 1,
+                    title: 'do the  thing one'
+                },
+                {
+                    id: 2,
+                    title: 'do the  thing two'
+                },
+                {
+                    id: 3,
+                    title: 'do the  thing three'
+                }
+            ],
+            nextTodoId: 4
+        },
+        methods: {
+            addNewTodo: function(){
+                this.todos.push({
+                    id: this.nextTodoId++,
+                    title: this.newTodoText
+                })
+
+                this.newTodoText = ''
+            }
+        }
+    })
+
+
+//    Vue.component('component-name', {/*.....*/})
+//    全局注册
+//    组件的 data 必须是一个函数
+//    每个组件必须只有一个根元素
+    Vue.component('button-counter', {
+        data: function(){
+            return {
+                count: 0
+            }
+        },
+        template: '<button @click="count++">You clicked me {{count}} times</button>'
+    })
+
+    Vue.component('blog-post', {
+        props: ['title'],
+        template: '<p>{{title}}</p>'
+    })
+
+    //    $emit('enlarge-text', 0.1)
+    //    调用内建的 $emit 方法并传入事件名称 向父级组件出发一个事情
+    //    用 v-on 在组件上监听这个事件
+    //    通过 $event 访问到事件抛出的值  即$emit 的第二个参数
+
+    Vue.component('blog-post-two',{
+        props: ['post'],
+        template: `
+            <div class="blog-post">
+                <h3>{{post.title}}</h3>
+                <button @click="$emit('enlarge-text', 0.1)">Enlarge text</button>
+                <div v-html="post.content"></div>
+            </div>
+        `
+    })
+
+    Vue.component('custom-input', {
+        props: ['value'],
+        template: `
+            <input :value="value" v-on:input="$emit('input', $event.target.value)">
+        `
+    })
+
+//    slot 通过插槽分发内容
+    Vue.component('alert-box', {
+        template: `
+            <div style="color: red;">
+                <strong>Error</strong>
+                <slot></slot>
+            </div>
+        `
+    })
+
+    Vue.component('my-row', {
+        template: '<tr><td>这是一个tr</td></tr>'
+    })
+
+    new Vue({
+        el: "#component-demos",
+        data: {
+            posts: [
+                {id: 1, title: 'qqqqq'},
+                {id: 2, title: 'fdddd'},
+                {id: 3, title: 'ggggg'}
+            ],
+            postFontSize: 1,
+            searchText: '1234'
+        },
+        methods: {
+            onEnlargeText: function(amount){   //处理事件函数  $emit('aa', b) b这个值将作为第一个参数传入这个方法
+                this.postFontSize += amount
+            }
+        }
+    })
+
+
+//    Component.vue  单文件组件
+
+</script>
+<style type="text/css">
+.tab-button {
+  padding: 6px 10px;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background: #f0f0f0;
+  margin-bottom: -1px;
+  margin-right: -1px;
+}
+.tab-button:hover {
+  background: #e0e0e0;
+}
+.tab-button.active {
+  background: #e0e0e0;
+}
+.tab {
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+</style>
+
+<div id="dynamic-componnent-demo" class="demo">
+    <button
+     v-for="tab in tabs"
+     :key="tab"
+     :class="['tab-button', {active: currentTab === tab}]"
+     @click="currentTab = tab">{{tab}}</button>
+     <component
+      :is="currentTabComponent"
+      class=tab></component>
+</div>
+
+<script type="text/javascript">
+    Vue.component('tab-home', {
+        template: '<div>Home</div>'
+    })
+    Vue.component('tab-posts', {
+        template: '<div>posts</div>'
+    })
+    Vue.component('tab-archive', {
+        template: '<div>archive</div>'
+    })
+    new Vue({
+        el: '#dynamic-componnent-demo',
+        data: {
+            currentTab: 'Home',
+            tabs: ['Home', 'Posts', 'Archive']
+        },
+        computed: {
+            currentTabComponent: function(){
+                return 'tab-' + this.currentTab.toLowerCase()
+            }
+        }
+    })
+</script>
+</body>
+</html>

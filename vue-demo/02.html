@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Document</title>
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/animate.css@3.5.1" rel="stylesheet" type="text/css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.14.1/lodash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tween.js@16.3.4"></script>
+<script src="https://cdn.jsdelivr.net/npm/color-js@1.0.3"></script>
+
+<style type="text/css">
+.tab-button {
+  padding: 6px 10px;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background: #f0f0f0;
+  margin-bottom: -1px;
+  /*margin-right: -1px;*/
+}
+.tab-button:hover {
+  background: #e0e0e0;
+}
+.tab-button.active {
+  background: #e0e0e0;
+}
+.tab {
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+.fade-enter-active, .fade-leave-active{
+	transition: opacity 1s;
+}
+.fade-enter, .fade-leave-to{
+	opacity: 0;
+}
+
+.slide-fade-enter-active{
+	transition: all .3s ease;
+}
+.slide-fade-leave-active{
+	transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.slide-fade-enter, .slide-fade-leave-to{
+	transform: translateX(10px);
+	opacity: 0;
+}
+.bounce-enter-active{
+	animation: bounce-in .5s;
+}
+.bounce-leave-active{
+	animation: bounce-in .5s reverse;
+}
+@keyframes bounce-in{
+	0%{
+		transform: scale(0);
+	}
+	50%{
+		transform: scale(1.5);
+	}
+	100%{
+		transform: scale(1);
+	}
+}
+
+.list-item{
+	display: inline-block;
+	margin-right: 10px;
+	transition: all 1s;
+}
+.list-enter-active, .list-leave-active{
+  transition: all 1s;
+}
+.list-enter, .list-leave-to{
+  opacity: 0;
+  transform: translateY(30px);
+}
+.list-leave-active{
+  position: absolute;
+}
+
+.flip-list-move{
+  transition: transform 1s;
+}
+</style>
+</head>
+<body>
+<div id="app">
+	{{msg}}
+	<base-checkbox v-model="lovingVue"></base-checkbox>
+	<hr/>
+	<div>
+		<button 
+		  v-for="tab in tabs"
+		  :key="tab"
+		  :class="['tab-button', {active: currentTab === tab}]"
+		  @click="currentTab = tab">{{tab}}</button>
+
+		<component :is="currentTabComponent" class="tab">
+			<news-list></news-list>
+			<ul>
+				<li v-for="news in newsList"
+				  :key="news">{{news}}</li>
+			</ul>
+		</component>
+	</div>
+	<hr/>
+	<div>
+		<button @click="show = !show">Toggle</button>
+		<transition name="fade">
+			<p v-if="show">hello</p>
+		</transition>
+		<transition name="slide-fade">
+			<p v-if="show">slide hello</p>
+		</transition>
+		<transition
+		  name="custom-classes-transition"
+		  enter-active-class="animated tada"
+		  leave-active-class="animated bounceOutRight">
+			<p v-if="show">animate.css hello</p>
+		</transition>
+	</div>
+	<div>
+		<button @click="ashow = !ashow">Toggle show</button>
+		<transition name="bounce">
+			<p v-if="ashow">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris facilisis enim libero, at lacinia diam fermentum id. Pellentesque habitant morbi tristique senectus et netus.</p>
+		</transition>
+	</div>
+	<div class="demo">
+	  <p>
+	  	<button @click="shuffle">shuffle</button>
+		<button @click="add">add</button>
+		<button @click="remove">remove</button>
+	  </p>
+	  <transition-group name="list" tag="p">
+		<span v-for="item in items" :key="item" class="list-item">{{item}}</span>
+	  </transition-group>
+	</div>
+	<div>
+	  <button @click=shuffle>shuffle</button>
+	  <transition-group name="flip-list" tag="ul">
+		<li v-for="item in items" :key="item">{{item}}</li>
+	  </transition-group>
+	</div>
+</div>
+
+<script type="text/javascript">
+//自定义组件的v-model
+Vue.component('base-checkbox', {
+  model: {
+  	prop: 'checked',
+  	event: 'change'
+  },
+  props: {
+  	checked: Boolean
+  },
+  template: `
+	<input
+	  type="checkbox"
+	  :checked="checked"
+	  @change="$emit('change', $event.target.checked)" />
+  `
+})
+
+Vue.component('tab-home', {
+        template: '<div>Home</div>'
+    })
+Vue.component('tab-posts', {
+    template: '<div><slot></slot></div>'
+})
+Vue.component('tab-archive', {
+    template: '<div>archive</div>'
+})
+
+Vue.component('news-list', {
+	template: `
+		<div>
+		hhh
+		<p>ddd</p>
+		</div>
+	`
+})
+
+new Vue({
+	el: '#app',
+	data: {
+		show: true,
+		ashow: true,
+		msg: 'hello',
+		lovingVue: false,
+		currentTab: 'Home',
+        tabs: ['Home', 'Posts', 'Archive'],
+        newsList: ['cat', 'hip', 'cup'],
+        items: [1,2,3,4,5,6,7,8,9],
+        nextNum: 10
+	},
+	computed: {
+		currentTabComponent : function(){
+			return 'tab-' + this.currentTab.toLowerCase()
+		}
+	},
+	methods: {
+		randomIndex: function(){
+			return Math.floor(Math.random() * this.items.length)
+		},
+		add: function(){
+			console.log('add')
+			this.items.splice(this.randomIndex(), 0, this.nextNum++)
+		},
+		remove: function(){
+			console.log('remove')
+			this.items.splice(this.randomIndex(), 1)
+		},
+		shuffle: function(){
+			console.log('shuffle')
+			this.items = _.shuffle(this.items)
+		}
+	}
+})	
+
+</script>
+<div id="number-demo">
+  <input v-model.number="number" type="number" step="20" />
+  <p>{{animatedNumber}}</p>
+</div>
+
+<script type="text/javascript">
+  new Vue({
+  	el: "#number-demo",
+  	data: {
+  		number: 0,
+  		tweenedNumber: 0
+  	},
+  	computed: {
+	  animatedNumber: function(){
+	  	return this.tweenedNumber.toFixed(0)
+	  }	
+  	},
+  	watch: {
+      number: function(newValue){
+      	TweenLite.to(this.$data, 0.5, {tweenedNumber: newValue})
+  	  }
+  	}
+  	
+  })
+</script>
+
+<div id="color-demo">
+	
+</div>
+
+</body>
+</html>

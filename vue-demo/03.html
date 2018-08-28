@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Document</title>
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/vuex/3.0.1/vuex.min.js"></script>
+</head>
+<body>
+<div id="vmA">
+	{{msg}}
+</div>
+<div id="vmB">
+	{{msg}}
+</div>
+
+
+<script type="text/javascript">
+  const sourceOfTruth = {
+  	msg: 'sdff'
+  }
+  //this.$root.$data
+
+  const vmA = new Vue({
+  	el: "#vmA",
+  	data: sourceOfTruth,
+  	mounted: function(){
+  		// console.log('123')
+  		console.log(this.$root.$data)
+  		this.$root.$data.msg = 'jj'
+  	}
+  })
+  const vmB = new Vue({
+  	el: "#vmB",
+  	data: sourceOfTruth
+  })
+
+  const store = {
+  	debug: true,
+  	state: {
+  		message: 'Hello'
+  	},
+  	setMsgAction(newVal){
+  		if(this.debug) console.log('setMsg', newVal)
+  		this.state.message = newVal
+  	},
+  	clearMsgAction(){
+  		if(this.debug) console.log('clearMsg')
+  		this.state.message = ''
+  	}
+  }
+
+  const vmC = new Vue({
+  	data:{
+  		privateState: {},
+  		sharedState: store.state
+  	} 
+  })
+
+</script>
+</body>
+</html>
